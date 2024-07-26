@@ -1,16 +1,12 @@
-import EventsService, {
-  IEvent,
-  IEventPublic,
-  INewEvent,
-} from "./events-service";
+import EventService, { IEvent, IEventPublic, INewEvent } from "./event-service";
 
-describe("Events service", () => {
+describe("Event service", () => {
   describe("owner", () => {
     const currentUserId = "xxx";
-    let eventsService: EventsService;
+    let eventService: EventService;
 
     beforeEach(() => {
-      eventsService = new EventsService();
+      eventService = new EventService();
     });
 
     it("should create an event with minimal args", async () => {
@@ -18,7 +14,7 @@ describe("Events service", () => {
         start: new Date("2020-01-01"),
         title: "Foobar",
       };
-      const received = await eventsService.create(currentUserId, toCreate);
+      const received = await eventService.create(currentUserId, toCreate);
 
       const expected: IEvent = {
         id: expect.any(String),
@@ -29,9 +25,10 @@ describe("Events service", () => {
         participants: [],
       };
 
+      expect(received).not.toBe(null);
       expect(received).toMatchObject(expected);
 
-      const receivedById = await eventsService.getById(
+      const receivedById = await eventService.getById(
         currentUserId,
         received.id
       );
@@ -47,7 +44,7 @@ describe("Events service", () => {
         participants: [currentUserId],
       };
 
-      const received = await eventsService.create(currentUserId, toCreate);
+      const received = await eventService.create(currentUserId, toCreate);
 
       const expected: IEvent = {
         id: expect.any(String),
@@ -60,7 +57,7 @@ describe("Events service", () => {
 
       expect(received).toMatchObject(expected);
 
-      const receivedById = await eventsService.getById(
+      const receivedById = await eventService.getById(
         currentUserId,
         received.id
       );
@@ -68,16 +65,34 @@ describe("Events service", () => {
       expect(receivedById).toMatchObject(expected);
     });
 
+    test.each([null, undefined])(
+      "should not create if no ownerId provided",
+      async (ownerId) => {
+        const toCreate: INewEvent = {
+          start: new Date("2020-01-01"),
+          title: "Foobar",
+        };
+
+        let received = null;
+        expect(async () => {
+          // @ts-ignore
+          received = await eventService.create(ownerId, toCreate);
+        }).rejects.toThrow(/cannot create/i);
+
+        expect(received).toBe(null);
+      }
+    );
+
     it("should get details of an owned event", async () => {
       // first, create an event
       const event = {
         start: new Date("2020-01-01"),
         title: "Foobar",
       };
-      const created = await eventsService.create(currentUserId, event);
+      const created = await eventService.create(currentUserId, event);
 
       // assess the getById feature
-      const received = await eventsService.getById(currentUserId, created.id);
+      const received = await eventService.getById(currentUserId, created.id);
 
       expect(received).toMatchObject({
         ...event,
@@ -93,13 +108,13 @@ describe("Events service", () => {
         start: new Date("2020-01-01"),
         title: "Foobar",
       };
-      const created = await eventsService.create(currentUserId, event);
+      const created = await eventService.create(currentUserId, event);
 
       // try to access as another user
       let received = null;
 
       expect(async () => {
-        received = await eventsService.getById("yyy", created.id);
+        received = await eventService.getById("yyy", created.id);
       }).rejects.toThrow(/not found/i);
 
       expect(received).toBe(null);
@@ -111,9 +126,9 @@ describe("Events service", () => {
         title: "Foobar",
         participants: ["alice-id", "bob-id", "charlie-id"],
       };
-      const created = await eventsService.create(currentUserId, event);
+      const created = await eventService.create(currentUserId, event);
 
-      const receivedDetails = await eventsService.getById(
+      const receivedDetails = await eventService.getById(
         currentUserId,
         created.id
       );
@@ -127,16 +142,16 @@ describe("Events service", () => {
         title: "Foobar",
         participants: ["alice-id", "bob-id", "charlie-id"],
       };
-      const created = await eventsService.create(currentUserId, event);
+      const created = await eventService.create(currentUserId, event);
 
-      const response = await eventsService.removeParticipant(
+      const response = await eventService.removeParticipant(
         currentUserId,
         created.id,
         "bob-id"
       );
       expect(response).toBe(true);
 
-      const receivedDetails = await eventsService.getById(
+      const receivedDetails = await eventService.getById(
         currentUserId,
         created.id
       );
@@ -153,17 +168,17 @@ describe("Events service", () => {
         title: "Foobar",
         participants: ["alice-id", "bob-id", "charlie-id"],
       };
-      const created = await eventsService.create(currentUserId, event);
+      const created = await eventService.create(currentUserId, event);
 
       const expected = ["bob-id", "dora-id"];
-      const response = await eventsService.updateParticipantsList(
+      const response = await eventService.updateParticipantsList(
         currentUserId,
         created.id,
         expected
       );
       expect(response).toBe(true);
 
-      const receivedDetails = await eventsService.getById(
+      const receivedDetails = await eventService.getById(
         currentUserId,
         created.id
       );
@@ -176,9 +191,9 @@ describe("Events service", () => {
         start: new Date("2020-01-01"),
         title: "Foobar",
       };
-      const created = await eventsService.create(currentUserId, event);
+      const created = await eventService.create(currentUserId, event);
 
-      const received = await eventsService.updateCapacity(
+      const received = await eventService.updateCapacity(
         currentUserId,
         created.id,
         10
@@ -186,7 +201,7 @@ describe("Events service", () => {
 
       expect(received).toBe(true);
 
-      const receivedDetails = await eventsService.getById(
+      const receivedDetails = await eventService.getById(
         currentUserId,
         created.id
       );
@@ -201,12 +216,12 @@ describe("Events service", () => {
         capacity: 100,
         participants: ["x", "y", "z"],
       };
-      const created = await eventsService.create(currentUserId, event);
+      const created = await eventService.create(currentUserId, event);
 
       let received = null;
 
       expect(async () => {
-        received = await eventsService.updateCapacity(
+        received = await eventService.updateCapacity(
           currentUserId,
           created.id,
           2
@@ -215,7 +230,7 @@ describe("Events service", () => {
 
       expect(received).toBe(null);
 
-      const receivedDetails = await eventsService.getById(
+      const receivedDetails = await eventService.getById(
         currentUserId,
         created.id
       );
@@ -225,14 +240,14 @@ describe("Events service", () => {
   });
 
   describe("participant", () => {
-    let eventsService: EventsService;
+    let eventService: EventService;
 
     const ownerId = "owner-xxx";
     let event: IEvent;
 
     beforeAll(async () => {
-      eventsService = new EventsService();
-      event = await eventsService.create(ownerId, {
+      eventService = new EventService();
+      event = await eventService.create(ownerId, {
         start: new Date("2024-09-09"),
         title: "Birthday party",
       });
@@ -242,19 +257,19 @@ describe("Events service", () => {
       const participant = "john-id";
 
       // list available events
-      const available: IEventPublic[] = await eventsService.listAvailable(
+      const available: IEventPublic[] = await eventService.listAvailable(
         participant
       );
 
       const eventId = available[0].id;
 
       // register to an event
-      const received = await eventsService.register(participant, eventId);
+      const received = await eventService.register(participant, eventId);
 
       expect(received).not.toBe(null);
 
       // list where I have registered
-      const listed = await eventsService.listMyParticipation(participant);
+      const listed = await eventService.listMyParticipation(participant);
 
       expect(listed).toMatchObject([expect.objectContaining({ id: eventId })]);
     });

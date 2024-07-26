@@ -1,9 +1,12 @@
+import { IUser } from "./user-service";
+
 const ERROR = {
   notFound: "Event not found",
   exceeded: "Event is fully booked",
   removeFirst:
     "Cannot update event's max capacity. Remove some participants first",
   notFoundParticipant: "Cannot remove non-existing participant",
+  notFoundOwner: "Cannot create event without knowing the owner",
   alreadyRegistered: "You are already registered for that event",
 };
 
@@ -27,7 +30,7 @@ export interface IEventPublic {
   title: INewEvent["title"];
 }
 
-class EventsService {
+class EventService {
   private events: IEvent[];
 
   constructor() {
@@ -45,22 +48,26 @@ class EventsService {
   async listOwned(ownerId: IEvent["ownerId"]) {
     return this.events
       .filter((event) => event.ownerId === ownerId)
-      .map((event) => EventsService.transformToPublic(event));
+      .map((event) => EventService.transformToPublic(event));
   }
 
   async listAvailable(userId: IUser["id"]): Promise<IEventPublic[]> {
     return this.events
       .filter((event) => !(event.participants ?? []).includes(userId))
-      .map((event) => EventsService.transformToPublic(event));
+      .map((event) => EventService.transformToPublic(event));
   }
 
   async listMyParticipation(userId: IUser["id"]) {
     return this.events
       .filter((event) => event.participants?.includes(userId))
-      .map((event) => EventsService.transformToPublic(event));
+      .map((event) => EventService.transformToPublic(event));
   }
 
-  async create(ownerId: IEvent["ownerId"], event: INewEvent) {
+  async create(ownerId: IEvent["ownerId"], event: INewEvent): Promise<IEvent> {
+    if (!ownerId) {
+      throw new Error(ERROR.notFoundOwner);
+    }
+
     const toSave = {
       ...event,
       capacity: event.capacity ?? null,
@@ -160,4 +167,4 @@ class EventsService {
   }
 }
 
-export default EventsService;
+export default EventService;

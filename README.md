@@ -16,9 +16,51 @@ participant registration, and checking participation status.
   that events do not exceed capacity.
 
 
-## Local setup
+## Development
+### Local setup
 
 1. `npm i`
-2. `npm start` to build and run
-3. `npm run dev` to run in hot reload mode
-4. `npm test` to run tests
+2. Copy `.env.example` to `.env` and edit the variables in it
+
+### Commands
+
+1. `npm start` to build and run
+2. `npm run dev` to run in hot reload mode
+3. `npm test` to run tests
+
+## API
+
+### `/user/register`
+This endpoint does not require any authentication. All other endpoins should have HTTP header `Authorization: "Bearer <ACCESS_TOKEN>"`
+
+**Request:**
+```json
+{
+  "fullName": "John Doe",
+	"email": "j.doe@test.com"
+}
+```
+**Response:** ID of the new user and accsess token for authentication
+```json
+{
+	"accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiMTgxNDg2ZC0wZTU3LTRmNDEtODk1ZC1kY2I4NDc0ODgyYWEiLCJpYXQiOjE3MjIwMDQ4NDIsImV4cCI6MTcyMjYwOTY0Mn0.3VzaT55vA-0KJONmDVyOQrlY3BJGG6pG6iVbcWgQHkI",
+	"id": "b181486d-0e57-4f41-895d-dcb8474882aa"
+}
+```
+
+### `/event/create`
+**Request:**
+```json
+{
+  "title": "Birthday party",
+	"start": "2024-07-26T14:50:17.179Z",
+  "participants?": ["user-1-id", "user-2-id"],
+  "capacity?": 10
+}
+```
+**Response:** ID of the new event
+```json
+{
+	"id": "f732ebbf-fa67-441e-9a79-61be2d68514a"
+}
+```
