@@ -40,7 +40,7 @@ describe("Events repository", () => {
     });
 
     it("should create an event with all args", async () => {
-      const toCreate: INewEvent = {
+      const toCreate = {
         start: new Date("2020-01-01"),
         title: "Foobar",
         capacity: 10,
@@ -104,6 +104,8 @@ describe("Events repository", () => {
 
       expect(received).toBe(null);
     });
+
+    it("should see the list of participants of an evetn", async () => {});
   });
 
   describe("participant", () => {
