@@ -264,7 +264,7 @@ describe("Event service", () => {
       const eventId = available[0].id;
 
       // register to an event
-      const received = await eventService.register(participant, eventId);
+      const received = await eventService.participate(participant, eventId);
 
       expect(received).not.toBe(null);
 

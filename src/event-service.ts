@@ -81,7 +81,10 @@ class EventService {
     return toSave;
   }
 
-  async register(userId: IUser["id"], eventId: IEvent["id"]): Promise<boolean> {
+  async participate(
+    userId: IUser["id"],
+    eventId: IEvent["id"]
+  ): Promise<boolean> {
     const event = this.events.find((e) => e.id === eventId);
 
     if (event === undefined) {
