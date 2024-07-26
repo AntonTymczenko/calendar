@@ -3,12 +3,14 @@ const ERROR = {
   exceeded: "Event is fully booked",
   removeFirst:
     "Cannot update event's max capacity. Remove some participants first",
+  notFoundParticipant: "Cannot remove non-existing participant",
+  alreadyRegistered: "You are already registered for that event",
 };
 
 export interface INewEvent {
   start: Date;
   title: string;
-  capacity?: number | null;
+  capacity?: number | null; // null for unlimited
   participants?: IUser["id"][];
 }
 
@@ -76,7 +78,7 @@ class EventsService {
     const event = this.events.find((e) => e.id === eventId);
 
     if (event === undefined) {
-      throw new Error(ERROR.notFound + ` ${eventId}`);
+      throw new Error(ERROR.notFound);
     }
 
     if (
@@ -84,6 +86,10 @@ class EventsService {
       event.capacity <= (event.participants?.length ?? 0)
     ) {
       throw new Error(ERROR.exceeded);
+    }
+
+    if (event.participants.includes(userId)) {
+      throw new Error(ERROR.alreadyRegistered);
     }
 
     event.participants.push(userId);
@@ -115,6 +121,40 @@ class EventsService {
     }
 
     event.capacity = capacity;
+
+    return true;
+  }
+
+  async updateParticipantsList(
+    ownerId: IEvent["ownerId"],
+    eventId: IEvent["id"],
+    participants: IEvent["participants"]
+  ): Promise<boolean> {
+    const event = await this.getById(ownerId, eventId);
+
+    if (event.capacity && participants.length > event.capacity) {
+      throw new Error(ERROR.removeFirst);
+    }
+
+    event.participants = participants;
+
+    return true;
+  }
+
+  async removeParticipant(
+    ownerId: IEvent["ownerId"],
+    eventId: IEvent["id"],
+    userId: IUser["id"]
+  ): Promise<boolean> {
+    const event = await this.getById(ownerId, eventId);
+
+    if (!event.participants.includes(userId)) {
+      throw new Error(ERROR.notFoundParticipant);
+    }
+
+    const userIndex = event.participants.findIndex((id) => id === userId);
+
+    event.participants.splice(userIndex, 1);
 
     return true;
   }

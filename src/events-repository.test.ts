@@ -109,8 +109,66 @@ describe("Events repository", () => {
       const event = {
         start: new Date("2020-01-01"),
         title: "Foobar",
+        participants: ["alice-id", "bob-id", "charlie-id"],
       };
       const created = await eventsService.create(currentUserId, event);
+
+      const receivedDetails = await eventsService.getById(
+        currentUserId,
+        created.id
+      );
+
+      expect(receivedDetails.participants).toMatchObject(event.participants);
+    });
+
+    it("should remove participant by id", async () => {
+      const event = {
+        start: new Date("2020-01-01"),
+        title: "Foobar",
+        participants: ["alice-id", "bob-id", "charlie-id"],
+      };
+      const created = await eventsService.create(currentUserId, event);
+
+      const response = await eventsService.removeParticipant(
+        currentUserId,
+        created.id,
+        "bob-id"
+      );
+      expect(response).toBe(true);
+
+      const receivedDetails = await eventsService.getById(
+        currentUserId,
+        created.id
+      );
+
+      expect(receivedDetails.participants).toMatchObject([
+        "alice-id",
+        "charlie-id",
+      ]);
+    });
+
+    it("should update the list of participants", async () => {
+      const event = {
+        start: new Date("2020-01-01"),
+        title: "Foobar",
+        participants: ["alice-id", "bob-id", "charlie-id"],
+      };
+      const created = await eventsService.create(currentUserId, event);
+
+      const expected = ["bob-id", "dora-id"];
+      const response = await eventsService.updateParticipantsList(
+        currentUserId,
+        created.id,
+        expected
+      );
+      expect(response).toBe(true);
+
+      const receivedDetails = await eventsService.getById(
+        currentUserId,
+        created.id
+      );
+
+      expect(receivedDetails.participants).toMatchObject(expected);
     });
 
     it("should limit capacity of an event", async () => {
@@ -134,6 +192,35 @@ describe("Events repository", () => {
       );
 
       expect(receivedDetails.capacity).toBe(10);
+    });
+
+    it("should not limit capacity if there are more participants", async () => {
+      const event = {
+        start: new Date("2020-01-01"),
+        title: "Foobar",
+        capacity: 100,
+        participants: ["x", "y", "z"],
+      };
+      const created = await eventsService.create(currentUserId, event);
+
+      let received = null;
+
+      expect(async () => {
+        received = await eventsService.updateCapacity(
+          currentUserId,
+          created.id,
+          2
+        );
+      }).rejects.toThrow(/cannot update/i);
+
+      expect(received).toBe(null);
+
+      const receivedDetails = await eventsService.getById(
+        currentUserId,
+        created.id
+      );
+
+      expect(receivedDetails.capacity).toBe(event.capacity);
     });
   });
 
