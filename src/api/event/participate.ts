@@ -7,31 +7,20 @@ export const handleEventParticipate =
   (req: APIRequestAuth, res: ServerResponse) => {
     let body = "";
 
-    req.on("data", (chunk) => {
-      body += chunk.toString();
-    });
-
     req.on("end", async () => {
       try {
-        const payloadRaw = JSON.parse(body) as INewEvent;
+        const eventId = (req.url ?? "").split("/");
+        console.log(eventId);
 
-        // TODO: validate raw payload
-        const payload = {
-          ...payloadRaw,
-          start: new Date(payloadRaw.start),
-        };
-
-        const event = await eventService.create(req.user.id, payload);
-
-        if (!event?.id) {
+        if (!eventId) {
           return res
             .writeHead(400)
             .end(JSON.stringify({ error: "Not created" }));
         }
 
-        return res
-          .writeHead(201, { "Content-Type": "application/json" })
-          .end(JSON.stringify({ id: event?.id }));
+        await eventService.participate(req.user.id, "xx");
+
+        return res.writeHead(201).end();
       } catch (e) {
         console.error(e);
       }

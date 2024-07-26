@@ -3,8 +3,10 @@ import type { ServerResponse } from "http";
 import EventService from "./event-service";
 import UserService, { type IUser } from "./user-service";
 import { handleUserRegister } from "./api/user/register";
-import { APIAuth, APIRequest } from "./api/middleware/auth";
+import { APIAuth, APIRequest, APIRequestAuth } from "./api/middleware/auth";
 import { handleEventCreate } from "./api/event/create";
+import { handleEventParticipate } from "./api/event/participate";
+import { ProtectedRouteType } from "./types";
 
 const port = 8080;
 
@@ -20,26 +22,52 @@ const routes = {
   },
   event: {
     create: handleEventCreate(eventService),
+    participate: handleEventParticipate(eventService),
   },
 };
 
-const protectedRoutes = ["/event/create"];
+const protectedRoutes = ["/event/create", "/event/"];
 
 // API
 const server = http.createServer(
   async (req: APIRequest, res: ServerResponse) => {
-    if (protectedRoutes.includes(req.url ?? "")) {
-      const authenticatedReq = await handleAuth(req, res);
-      if (authenticatedReq) {
-        if (req.method === "POST" && req.url === "/event/create") {
-          routes.event.create(authenticatedReq, res);
-        }
-      }
-    } else if (req.method === "POST" && req.url === "/user/register") {
+    console.log({
+      request: `${req.method} ${req.url}`,
+      m: req.url?.match(/^\/event\/[-a-f0-9]+\/participate$/),
+    });
+    if (req.method === "POST" && req.url === "/user/register") {
       routes.user.register(req, res);
     } else {
-      res.writeHead(404, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ error: "Not found" }));
+      const url = req.url ?? "";
+
+      const protectedRoute = (
+        [
+          ["POST", "/event/create", routes.event.create],
+          [
+            "POST",
+            /^\/event\/[-a-f0-9]+\/participate$/,
+            routes.event.participate,
+          ],
+        ] as ProtectedRouteType[]
+      ).find(([method, matcher]) => {
+        const isRegEx = matcher instanceof RegExp;
+
+        return (
+          req.method === method &&
+          (isRegEx ? url.match(matcher) : url === matcher)
+        );
+      })?.[2];
+
+      if (protectedRoute) {
+        const authenticatedReq = await handleAuth(req, res);
+        if (authenticatedReq) {
+          protectedRoute(authenticatedReq, res);
+        }
+      } else {
+        res
+          .writeHead(404, { "Content-Type": "application/json" })
+          .end(JSON.stringify({ error: "Not found" }));
+      }
     }
   }
 );
