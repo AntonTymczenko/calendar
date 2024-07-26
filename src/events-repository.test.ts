@@ -1,6 +1,7 @@
 import EventsService, { IEvent, INewEvent } from "./events-repository";
 
 describe("Events repository", () => {
+  const currentUserId = "xxx";
   let eventsService: EventsService;
 
   beforeEach(() => {
@@ -8,7 +9,6 @@ describe("Events repository", () => {
   });
 
   it("should create an event with minimal args", async () => {
-    const currentUserId = "xxx";
     const toCreate: INewEvent = {
       start: new Date("2020-01-01"),
       title: "Foobar",
@@ -35,8 +35,6 @@ describe("Events repository", () => {
   });
 
   it("should create an event with all args", async () => {
-    const currentUserId = "xxx";
-
     const toCreate: INewEvent = {
       start: new Date("2020-01-01"),
       title: "Foobar",
@@ -65,5 +63,40 @@ describe("Events repository", () => {
     expect(receivedById).toMatchObject(expected);
   });
 
-  it("should get details of an owned event", () => {});
+  it("should get details of an owned event", async () => {
+    // first, create an event
+    const event = {
+      start: new Date("2020-01-01"),
+      title: "Foobar",
+    };
+    const created = await eventsService.create(currentUserId, event);
+
+    // assess the getById feature
+    const received = await eventsService.getById(currentUserId, created.id);
+
+    expect(received).toMatchObject({
+      ...event,
+      ownerId: currentUserId,
+    });
+
+    expect(received.participants).toMatchObject(expect.arrayContaining([]));
+  });
+
+  it("should not get details of an event where not an owner", async () => {
+    // create as a default user
+    const event = {
+      start: new Date("2020-01-01"),
+      title: "Foobar",
+    };
+    const created = await eventsService.create(currentUserId, event);
+
+    // try to access as another user
+    let received = null;
+
+    expect(async () => {
+      received = await eventsService.getById("yyy", created.id);
+    }).rejects.toThrow(/not found/i);
+
+    expect(received).toBe(null);
+  });
 });
