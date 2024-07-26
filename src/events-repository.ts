@@ -12,7 +12,7 @@ export interface IEvent extends INewEvent {
   participants: IUser[];
 }
 
-class EventsRepository {
+class EventsService {
   private events: IEvent[];
 
   constructor() {
@@ -38,4 +38,4 @@ class EventsRepository {
   }
 }
 
-export default EventsRepository;
+export default EventsService;

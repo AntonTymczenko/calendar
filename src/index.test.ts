@@ -1,10 +1,10 @@
-import EventsRepository, { IEvent, INewEvent } from "./events-repository";
+import EventsService, { IEvent, INewEvent } from "./events-repository";
 
 describe("Events repository", () => {
-  let eventsRpository: EventsRepository;
+  let eventsService: EventsService;
 
   beforeEach(() => {
-    eventsRpository = new EventsRepository();
+    eventsService = new EventsService();
   });
 
   it("should create an event", async () => {
@@ -13,7 +13,7 @@ describe("Events repository", () => {
       start: new Date("2020-01-01"),
       title: "Foobar",
     };
-    const received = await eventsRpository.create(currentUserId, toCreate);
+    const received = await eventsService.create(currentUserId, toCreate);
 
     const expected: IEvent = {
       id: expect.any(String),
