@@ -105,7 +105,36 @@ describe("Events repository", () => {
       expect(received).toBe(null);
     });
 
-    it("should see the list of participants of an evetn", async () => {});
+    it("should see the list of participants of an event", async () => {
+      const event = {
+        start: new Date("2020-01-01"),
+        title: "Foobar",
+      };
+      const created = await eventsService.create(currentUserId, event);
+    });
+
+    it("should limit capacity of an event", async () => {
+      const event = {
+        start: new Date("2020-01-01"),
+        title: "Foobar",
+      };
+      const created = await eventsService.create(currentUserId, event);
+
+      const received = await eventsService.updateCapacity(
+        currentUserId,
+        created.id,
+        10
+      );
+
+      expect(received).toBe(true);
+
+      const receivedDetails = await eventsService.getById(
+        currentUserId,
+        created.id
+      );
+
+      expect(receivedDetails.capacity).toBe(10);
+    });
   });
 
   describe("participant", () => {

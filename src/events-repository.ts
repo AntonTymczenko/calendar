@@ -1,6 +1,8 @@
 const ERROR = {
   notFound: "Event not found",
   exceeded: "Event is fully booked",
+  removeFirst:
+    "Cannot update event's max capacity. Remove some participants first",
 };
 
 export interface INewEvent {
@@ -99,6 +101,22 @@ class EventsService {
     }
 
     return found;
+  }
+
+  async updateCapacity(
+    ownerId: IEvent["ownerId"],
+    eventId: IEvent["id"],
+    capacity: number
+  ): Promise<boolean> {
+    const event = await this.getById(ownerId, eventId);
+
+    if (event.participants.length > capacity) {
+      throw new Error(ERROR.removeFirst);
+    }
+
+    event.capacity = capacity;
+
+    return true;
   }
 }
 
