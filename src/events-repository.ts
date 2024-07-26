@@ -2,14 +2,14 @@ export interface INewEvent {
   start: Date;
   title: string;
   capacity?: number | null;
-  participants?: IUser[];
+  participants?: IUser["id"][];
 }
 
 export interface IEvent extends INewEvent {
   id: string;
   ownerId: IUser["id"];
-  capacity: number | null;
-  participants: IUser[];
+  capacity: INewEvent["capacity"];
+  participants: INewEvent["participants"];
 }
 
 class EventsService {
@@ -35,6 +35,18 @@ class EventsService {
     this.events.push(toSave);
 
     return toSave;
+  }
+
+  async getById(ownerId: IEvent["ownerId"], eventId: IEvent["id"]) {
+    const found = this.events.find(
+      (event) => event.id === eventId && event.ownerId === ownerId
+    );
+
+    if (!found) {
+      throw new Error("Event not found");
+    }
+
+    return found;
   }
 }
 
