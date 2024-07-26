@@ -2,9 +2,9 @@ import EventsService, {
   IEvent,
   IEventPublic,
   INewEvent,
-} from "./events-repository";
+} from "./events-service";
 
-describe("Events repository", () => {
+describe("Events service", () => {
   describe("owner", () => {
     const currentUserId = "xxx";
     let eventsService: EventsService;
@@ -238,18 +238,22 @@ describe("Events repository", () => {
       });
     });
 
-    it("should be able to register at an event", async () => {
+    it("should be able to register at an event, list available, list my", async () => {
       const participant = "john-id";
+
+      // list available events
       const available: IEventPublic[] = await eventsService.listAvailable(
         participant
       );
 
       const eventId = available[0].id;
 
+      // register to an event
       const received = await eventsService.register(participant, eventId);
 
       expect(received).not.toBe(null);
 
+      // list where I have registered
       const listed = await eventsService.listMyParticipation(participant);
 
       expect(listed).toMatchObject([expect.objectContaining({ id: eventId })]);
