@@ -66,3 +66,8 @@ This endpoint does not require any authentication. All other endpoins should hav
 	"id": "f732ebbf-fa67-441e-9a79-61be2d68514a"
 }
 ```
+
+### `/event/:id/participate`
+
+**Request:** No request body
+**Response:** No response body, 201 code if okay

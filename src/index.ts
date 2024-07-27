@@ -31,44 +31,39 @@ const protectedRoutes = ["/event/create", "/event/"];
 // API
 const server = http.createServer(
   async (req: APIRequest, res: ServerResponse) => {
-    console.log({
-      request: `${req.method} ${req.url}`,
-      m: req.url?.match(/^\/event\/[-a-f0-9]+\/participate$/),
-    });
     if (req.method === "POST" && req.url === "/user/register") {
-      routes.user.register(req, res);
-    } else {
-      const url = req.url ?? "";
+      return routes.user.register(req, res);
+    }
+    const url = req.url ?? "";
 
-      const protectedRoute = (
+    const protectedRoute = (
+      [
+        ["POST", "/event/create", routes.event.create],
         [
-          ["POST", "/event/create", routes.event.create],
-          [
-            "POST",
-            /^\/event\/[-a-f0-9]+\/participate$/,
-            routes.event.participate,
-          ],
-        ] as ProtectedRouteType[]
-      ).find(([method, matcher]) => {
-        const isRegEx = matcher instanceof RegExp;
+          "POST",
+          /^\/event\/[-a-f0-9]+\/participate$/,
+          routes.event.participate,
+        ],
+      ] as ProtectedRouteType[]
+    ).find(([method, matcher]) => {
+      const isRegEx = matcher instanceof RegExp;
 
-        return (
-          req.method === method &&
-          (isRegEx ? url.match(matcher) : url === matcher)
-        );
-      })?.[2];
+      return (
+        req.method === method &&
+        (isRegEx ? url.match(matcher) : url === matcher)
+      );
+    })?.[2];
 
-      if (protectedRoute) {
-        const authenticatedReq = await handleAuth(req, res);
-        if (authenticatedReq) {
-          protectedRoute(authenticatedReq, res);
-        }
-      } else {
-        res
-          .writeHead(404, { "Content-Type": "application/json" })
-          .end(JSON.stringify({ error: "Not found" }));
+    if (protectedRoute) {
+      const authenticatedReq = await handleAuth(req, res);
+      if (authenticatedReq) {
+        return protectedRoute(authenticatedReq, res);
       }
     }
+
+    res
+      .writeHead(404, { "Content-Type": "application/json" })
+      .end(JSON.stringify({ error: "Not found" }));
   }
 );
 
