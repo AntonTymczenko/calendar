@@ -19,6 +19,8 @@ participant registration, and checking participation status.
 ## Development
 ### Local setup
 
+Node v20 is required
+
 1. `npm i`
 2. Copy `.env.example` to `.env` and edit the variables in it
 
