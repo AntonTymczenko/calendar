@@ -1,70 +1,70 @@
-import { IEvent } from "../../services/event-service";
+import { IEvent, IEventPublic } from "../../services/event-service";
 import { IRegisteredUser, IUser } from "../../services/user-service";
+import { baseUrl, getRequestFn, registerUser } from "../test/helpers";
 
-const baseUrl = "http://localhost:8080";
-
-async function req(url: string, payload: any, options?: any) {
-  const response = await fetch(url, {
-    ...(payload ? { body: JSON.stringify(payload) } : {}),
-    ...(options || {}),
-  });
-  const data = await response?.json();
-
-  return data;
-}
-
-async function registerUser(
-  payload: Pick<IUser, "fullName" | "email">
-): Promise<IRegisteredUser> {
-  return req(`${baseUrl}/user/register`, payload, {
-    method: "POST",
-  });
-}
-
-describe("API endpoint /event/:id/participants", () => {
+describe("API endpoint /user/events", () => {
   let owner: IRegisteredUser;
-
-  async function request(method: "POST" | "GET", url: string, payload?: any) {
-    return req(url, payload, {
-      method,
-      headers: {
-        authorization: `Bearer ${owner.accessToken}`,
-      },
-    });
-  }
+  let participant: IRegisteredUser;
+  let requestByOwner: ReturnType<typeof getRequestFn>;
+  let requestByParticipant: ReturnType<typeof getRequestFn>;
 
   beforeAll(async () => {
     owner = await registerUser({
       fullName: "John Owner",
       email: "j.owner@test.com",
     });
-  });
-
-  it("should show detialed participants list with names", async () => {
-    const participant1 = await registerUser({
-      fullName: "Alice",
+    participant = await registerUser({
+      fullName: "Alice Foo",
       email: "a@test.com",
     });
-    const participant2 = await registerUser({
-      fullName: "Bob",
-      email: "b@test.com",
+
+    requestByOwner = getRequestFn(owner);
+    requestByParticipant = getRequestFn(participant);
+  });
+
+  it("should show detialed list of user's events", async () => {
+    const event1 = await requestByOwner("POST", `${baseUrl}/event/create`, {
+      title: "Event 1",
+      start: new Date("2001-01-01").toISOString(),
+      participants: [participant.userId],
+    });
+    const event2 = await requestByOwner("POST", `${baseUrl}/event/create`, {
+      title: "Event 2",
+      start: new Date("2001-01-02").toISOString(),
+      participants: [participant.userId],
+    });
+    const event3 = await requestByOwner("POST", `${baseUrl}/event/create`, {
+      title: "Event 3",
+      start: new Date("2001-01-03").toISOString(),
+      participants: [participant.userId],
+    });
+    const event4 = await requestByOwner("POST", `${baseUrl}/event/create`, {
+      title: "Event 4",
+      start: new Date("2001-01-04").toISOString(),
+      participants: ["foobar-user"],
     });
 
-    const event = (await request("POST", `${baseUrl}/event/create`, {
-      title: "Foobar",
-      start: new Date().toISOString(),
-      participants: [participant1.userId, participant2.userId],
-    })) as { id: IEvent["id"] };
-
-    const received = await request(
+    const received = (await requestByParticipant(
       "GET",
-      `${baseUrl}/event/${event.id}/participants`
-    );
-
-    expect(received).toHaveLength(2);
+      `${baseUrl}/user/events`
+    )) as IEventPublic[];
+    expect(received).toHaveLength(3);
     expect(received).toMatchObject([
-      { id: expect.any(String), fullName: "Alice" },
-      { id: expect.any(String), fullName: "Bob" },
+      {
+        id: expect.any(String),
+        title: "Event 1",
+        start: new Date("2001-01-01").toISOString(),
+      },
+      {
+        id: expect.any(String),
+        title: "Event 2",
+        start: new Date("2001-01-02").toISOString(),
+      },
+      {
+        id: expect.any(String),
+        title: "Event 3",
+        start: new Date("2001-01-03").toISOString(),
+      },
     ]);
   });
 });
