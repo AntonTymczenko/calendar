@@ -1,5 +1,5 @@
-import { IEvent } from "../../../src/event-service";
-import { IRegisteredUser, IUser } from "../../../src/user-service";
+import { IEvent } from "../../services/event-service";
+import { IRegisteredUser, IUser } from "../../services/user-service";
 
 const baseUrl = "http://localhost:8080";
 

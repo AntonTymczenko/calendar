@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "http";
-import UserService, { IUser } from "../../user-service";
+import UserService, { IUser } from "../../services/user-service";
 
 export type APIRequest = IncomingMessage & {
   user?: Omit<IUser, "accessToken">;
@@ -10,23 +10,16 @@ export type APIRequestAuth = IncomingMessage & {
 };
 
 export const APIAuth = (userService: UserService) => {
-  return async (
-    req: APIRequest,
-    res: ServerResponse
-  ): Promise<APIRequestAuth | null> => {
+  return async (req: APIRequest): Promise<APIRequestAuth | null> => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || typeof authHeader !== "string") {
-      res.writeHead(401, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ error: "No token provided" }));
       return null;
     }
 
     const user = await userService.authenticate(authHeader.split(" ")[1]);
 
     if (!user) {
-      res.writeHead(401, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ error: "Access denied" }));
       return null;
     }
 

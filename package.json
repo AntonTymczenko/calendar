@@ -8,9 +8,9 @@
     "prestart": "npm run build",
     "start": "node dist/index.js",
     "dev": "nodemon",
-    "test": "jest src",
-    "test:watch": "jest --watch src",
-    "test:e2e": "jest ./test"
+    "test": "jest ./src/services",
+    "test:watch": "jest --watch ./src/services",
+    "test:e2e": "jest ./src/api"
   },
   "keywords": [
     "calendar"

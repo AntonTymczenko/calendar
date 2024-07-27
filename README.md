@@ -76,7 +76,8 @@ This endpoint does not require any authentication. All other endpoins should hav
 
 ### GET `/event/:id/participants`
 
-**Request:** No request body
+List participants of an event
+
 **Response:**
 ```json
 [
@@ -84,3 +85,16 @@ This endpoint does not require any authentication. All other endpoins should hav
   { "id": "user-2-id", "fullName": "Bob" }
 ]
 ```
+
+### GET `/user/events`
+
+List events where the current user is a participant
+
+**Response:**
+```json
+[
+  { "id": "event-1-id", "title": "Event 1 title", "start": Date },
+  { "id": "event-2-id", "title": "Event 2 title", "start": Date }
+]
+```
+

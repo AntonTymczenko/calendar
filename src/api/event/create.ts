@@ -1,5 +1,5 @@
 import type { ServerResponse } from "http";
-import EventService, { INewEvent } from "../../event-service";
+import EventService, { INewEvent } from "../../services/event-service";
 import { APIRequestAuth } from "../middleware/auth";
 
 export const handleEventCreate =
@@ -29,9 +29,11 @@ export const handleEventCreate =
             .end(JSON.stringify({ error: "Not created" }));
         }
 
+        const response = JSON.stringify({ id: event.id });
+
         return res
           .writeHead(201, { "Content-Type": "application/json" })
-          .end(JSON.stringify({ id: event?.id }));
+          .end(response);
       } catch (e) {
         console.error(e);
       }

@@ -1,7 +1,7 @@
 import type { ServerResponse } from "http";
 import { APIRequestAuth } from "../middleware/auth";
-import EventService from "../../event-service";
-import UserService from "../../user-service";
+import EventService from "../../services/event-service";
+import UserService from "../../services/user-service";
 
 export const handleEventListParticipants =
   (eventService: EventService, userService: UserService) =>

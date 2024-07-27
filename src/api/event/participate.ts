@@ -1,5 +1,5 @@
 import type { ServerResponse } from "http";
-import EventService from "../../event-service";
+import EventService from "../../services/event-service";
 import { APIRequestAuth } from "../middleware/auth";
 
 export const handleEventParticipate =

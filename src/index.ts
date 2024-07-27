@@ -1,13 +1,14 @@
 import http from "http";
 import type { ServerResponse } from "http";
-import EventService from "./event-service";
-import UserService, { type IUser } from "./user-service";
+import EventService from "./services/event-service";
+import UserService, { type IUser } from "./services/user-service";
+import { ProtectedRouteType } from "./types";
 import { handleUserRegister } from "./api/user/register";
 import { APIAuth, APIRequest, APIRequestAuth } from "./api/middleware/auth";
 import { handleEventCreate } from "./api/event/create";
 import { handleEventParticipate } from "./api/event/participate";
-import { ProtectedRouteType } from "./types";
 import { handleEventListParticipants } from "./api/event/participants";
+import { handleUserListParticipated } from "./api/user/events";
 
 const port = 8080;
 
@@ -20,6 +21,7 @@ const handleAuth = APIAuth(userService);
 const routes = {
   user: {
     register: handleUserRegister(userService),
+    events: handleUserListParticipated(eventService),
   },
   event: {
     create: handleEventCreate(eventService),
@@ -36,6 +38,7 @@ const server = http.createServer(
     if (req.method === "POST" && req.url === "/user/register") {
       return routes.user.register(req, res);
     }
+
     const url = req.url ?? "";
 
     const protectedRoute = (
@@ -51,6 +54,7 @@ const server = http.createServer(
           /^\/event\/[-a-f0-9]+\/participants$/,
           routes.event.participants,
         ],
+        ["GET", "/user/events", routes.user.events],
       ] as ProtectedRouteType[]
     ).find(([method, matcher]) => {
       const isRegEx = matcher instanceof RegExp;
@@ -62,10 +66,14 @@ const server = http.createServer(
     })?.[2];
 
     if (protectedRoute) {
-      const authenticatedReq = await handleAuth(req, res);
-      if (authenticatedReq) {
-        return protectedRoute(authenticatedReq, res);
+      const authenticatedReq = await handleAuth(req);
+      if (!authenticatedReq) {
+        return res
+          .writeHead(401, { "Content-Type": "application/json" })
+          .end(JSON.stringify({ error: "Access denied" }));
       }
+
+      return protectedRoute(authenticatedReq, res);
     }
 
     res

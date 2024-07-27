@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "http";
-import UserService from "../../user-service";
+import UserService from "../../services/user-service";
 
 export const handleUserRegister =
   (userService: UserService) => (req: IncomingMessage, res: ServerResponse) => {
