@@ -72,6 +72,7 @@ This endpoint does not require any authentication. All other endpoins should hav
 ### POST `/event/:id/participate`
 
 **Request:** No request body
+
 **Response:** No response body, 201 code if okay
 
 ### GET `/event/:id/participants`
@@ -112,5 +113,3 @@ capacity
 ```json
 { "capacity": number }
 ```
-
-###
