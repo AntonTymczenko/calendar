@@ -41,14 +41,14 @@ This endpoint does not require any authentication. All other endpoins should hav
 ```json
 {
   "fullName": "John Doe",
-	"email": "j.doe@test.com"
+  "email": "j.doe@test.com"
 }
 ```
 **Response:** ID of the new user and accsess token for authentication
 ```json
 {
-	"accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiMTgxNDg2ZC0wZTU3LTRmNDEtODk1ZC1kY2I4NDc0ODgyYWEiLCJpYXQiOjE3MjIwMDQ4NDIsImV4cCI6MTcyMjYwOTY0Mn0.3VzaT55vA-0KJONmDVyOQrlY3BJGG6pG6iVbcWgQHkI",
-	"userId": "b181486d-0e57-4f41-895d-dcb8474882aa"
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiMTgxNDg2ZC0wZTU3LTRmNDEtODk1ZC1kY2I4NDc0ODgyYWEiLCJpYXQiOjE3MjIwMDQ4NDIsImV4cCI6MTcyMjYwOTY0Mn0.3VzaT55vA-0KJONmDVyOQrlY3BJGG6pG6iVbcWgQHkI",
+  "userId": "b181486d-0e57-4f41-895d-dcb8474882aa"
 }
 ```
 
@@ -57,7 +57,7 @@ This endpoint does not require any authentication. All other endpoins should hav
 ```json
 {
   "title": "Birthday party",
-	"start": "2024-07-26T14:50:17.179Z",
+  "start": "2024-07-26T14:50:17.179Z",
   "participants?": ["user-1-id", "user-2-id"],
   "capacity?": 10
 }
@@ -65,7 +65,7 @@ This endpoint does not require any authentication. All other endpoins should hav
 **Response:** ID of the new event
 ```json
 {
-	"id": "f732ebbf-fa67-441e-9a79-61be2d68514a"
+  "id": "f732ebbf-fa67-441e-9a79-61be2d68514a"
 }
 ```
 
