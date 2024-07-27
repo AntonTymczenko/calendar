@@ -135,6 +135,15 @@ class EventService {
     return true;
   }
 
+  async getEventParticipants(
+    ownerId: IEvent["ownerId"],
+    eventId: IEvent["id"]
+  ): Promise<IEvent["participants"]> {
+    const event = await this.getById(ownerId, eventId);
+
+    return event.participants;
+  }
+
   async updateParticipantsList(
     ownerId: IEvent["ownerId"],
     eventId: IEvent["id"],

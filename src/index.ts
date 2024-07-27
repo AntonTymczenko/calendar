@@ -7,6 +7,7 @@ import { APIAuth, APIRequest, APIRequestAuth } from "./api/middleware/auth";
 import { handleEventCreate } from "./api/event/create";
 import { handleEventParticipate } from "./api/event/participate";
 import { ProtectedRouteType } from "./types";
+import { handleEventListParticipants } from "./api/event/participants";
 
 const port = 8080;
 
@@ -23,6 +24,7 @@ const routes = {
   event: {
     create: handleEventCreate(eventService),
     participate: handleEventParticipate(eventService),
+    participants: handleEventListParticipants(eventService, userService),
   },
 };
 
@@ -43,6 +45,11 @@ const server = http.createServer(
           "POST",
           /^\/event\/[-a-f0-9]+\/participate$/,
           routes.event.participate,
+        ],
+        [
+          "GET",
+          /^\/event\/[-a-f0-9]+\/participants$/,
+          routes.event.participants,
         ],
       ] as ProtectedRouteType[]
     ).find(([method, matcher]) => {

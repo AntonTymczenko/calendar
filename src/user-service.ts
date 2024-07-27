@@ -1,10 +1,18 @@
 import TokenService from "./token-service";
 
-export interface IUser {
+export interface IUserPublic {
   id: string;
   fullName: string;
+}
+
+export interface IUser extends IUserPublic {
   email: string;
   accessToken: string;
+}
+
+export interface IRegisteredUser {
+  userId: IUser["id"];
+  accessToken: IUser["accessToken"];
 }
 
 class UserService {
@@ -16,7 +24,16 @@ class UserService {
     this.tokenService = cryptoModule ?? new TokenService();
   }
 
-  async register(userRequest: Pick<IUser, "fullName" | "email">) {
+  static transformToPublic(user: IUser): IUserPublic {
+    return {
+      id: user.id,
+      fullName: user.fullName,
+    };
+  }
+
+  async register(
+    userRequest: Pick<IUser, "fullName" | "email">
+  ): Promise<IRegisteredUser> {
     const { fullName, email } = userRequest;
     // TODO: check if email is unique
 
@@ -51,6 +68,12 @@ class UserService {
     }
 
     return null;
+  }
+
+  async list(userIds: IUser["id"][]): Promise<IUserPublic[]> {
+    const users = this.users.filter((user) => userIds.includes(user.id));
+
+    return users.map(UserService.transformToPublic);
   }
 }
 

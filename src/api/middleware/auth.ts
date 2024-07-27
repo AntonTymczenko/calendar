@@ -2,11 +2,11 @@ import type { IncomingMessage, ServerResponse } from "http";
 import UserService, { IUser } from "../../user-service";
 
 export type APIRequest = IncomingMessage & {
-  user?: IUser;
+  user?: Omit<IUser, "accessToken">;
 };
 
 export type APIRequestAuth = IncomingMessage & {
-  user: IUser;
+  user: Omit<IUser, "accessToken">;
 };
 
 export const APIAuth = (userService: UserService) => {
@@ -30,7 +30,9 @@ export const APIAuth = (userService: UserService) => {
       return null;
     }
 
-    req.user = user;
+    const { accessToken, ...rest } = user;
+
+    req.user = rest;
 
     return req as APIRequestAuth;
   };

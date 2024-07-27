@@ -1,9 +1,10 @@
 import type { ServerResponse } from "http";
-import EventService from "../../event-service";
 import { APIRequestAuth } from "../middleware/auth";
+import EventService from "../../event-service";
+import UserService from "../../user-service";
 
-export const handleEventParticipate =
-  (eventService: EventService) =>
+export const handleEventListParticipants =
+  (eventService: EventService, userService: UserService) =>
   (req: APIRequestAuth, res: ServerResponse) => {
     req.on("data", () => {});
 
@@ -17,12 +18,14 @@ export const handleEventParticipate =
             .end(JSON.stringify({ error: "Bad event ID" }));
         }
 
-        const ok = await eventService.participate(req.user.id, eventId);
-        if (!ok) {
-          throw new Error("Failed to register a user as a participant");
-        }
+        const participantIds = await eventService.getEventParticipants(
+          req.user.id,
+          eventId
+        );
 
-        return res.writeHead(201).end();
+        const participants = await userService.list(participantIds);
+
+        return res.writeHead(200).end(JSON.stringify(participants));
       } catch (e) {
         console.error(e);
       }

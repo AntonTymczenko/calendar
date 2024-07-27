@@ -36,7 +36,7 @@ export const handleUserRegister =
 
         return res
           .writeHead(200, { "Content-Type": "application/json" })
-          .end(JSON.stringify({ accessToken, id: userId }));
+          .end(JSON.stringify({ accessToken, userId }));
       } catch (e) {
         console.error(e);
       }
