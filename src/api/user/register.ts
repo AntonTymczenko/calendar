@@ -11,8 +11,24 @@ export const handleUserRegister =
     });
 
     req.on("end", async () => {
+      let email = null;
+      let fullName = null;
+
       try {
-        const { email, fullName } = JSON.parse(body);
+        const payload = JSON.parse(body);
+
+        email = payload?.email;
+        fullName = payload?.fullName;
+
+        if (!email || !fullName) {
+          throw new Error(`Bad request. Body: "${body}"`);
+        }
+      } catch (e) {
+        console.error(e);
+        return res.writeHead(400).end();
+      }
+
+      try {
         const { userId, accessToken } = await userService.register({
           email,
           fullName,
