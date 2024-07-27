@@ -98,3 +98,19 @@ List events where the current user is a participant
 ]
 ```
 
+### POST `/event/:id/limit-capacity`
+
+Limit the number of participants for an event, so that events do not exceed
+capacity
+
+**Request:**
+```json
+{ "capacity": number }
+```
+
+**Response:**
+```json
+{ "capacity": number }
+```
+
+###

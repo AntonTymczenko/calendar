@@ -9,6 +9,7 @@ import { handleEventCreate } from "./api/event/create";
 import { handleEventParticipate } from "./api/event/participate";
 import { handleEventListParticipants } from "./api/event/participants";
 import { handleUserListParticipated } from "./api/user/events";
+import { handleEventLimitCapacity } from "./api/event/limit-capacity";
 
 const port = 8080;
 
@@ -25,6 +26,7 @@ const routes = {
   },
   event: {
     create: handleEventCreate(eventService),
+    limitCapacity: handleEventLimitCapacity(eventService),
     participate: handleEventParticipate(eventService),
     participants: handleEventListParticipants(eventService, userService),
   },
@@ -48,6 +50,11 @@ const server = http.createServer(
           "POST",
           /^\/event\/[-a-f0-9]+\/participate$/,
           routes.event.participate,
+        ],
+        [
+          "POST",
+          /^\/event\/[-a-f0-9]+\/limit-capacity$/,
+          routes.event.limitCapacity,
         ],
         [
           "GET",
