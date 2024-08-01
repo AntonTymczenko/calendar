@@ -16,7 +16,6 @@ class MessageService {
     userIds: IUser["id"][]
   ): Promise<boolean> {
     let everythingIsOkay = true;
-    console.log({ everythingIsOkay });
 
     const users = await Promise.allSettled(
       userIds.map((userId) => this.userService.getById(userId))
@@ -25,7 +24,6 @@ class MessageService {
     if (users.filter((r) => r.status === "rejected").length) {
       everythingIsOkay = false;
     }
-    console.log({ everythingIsOkay });
 
     const emails = users
       .filter((response) => response.status === "fulfilled")
@@ -43,7 +41,6 @@ class MessageService {
     if (sendEmailResponses.filter((r) => r.status === "rejected").length) {
       everythingIsOkay = false;
     }
-    console.log({ everythingIsOkay });
 
     return everythingIsOkay;
   }
