@@ -22,6 +22,7 @@ export interface IEvent extends INewEvent {
   ownerId: IUser["id"];
   capacity: Exclude<INewEvent["capacity"], undefined>;
   participants: Exclude<INewEvent["participants"], undefined>;
+  status?: "canceled";
 }
 
 export interface IEventPublic {
@@ -54,12 +55,14 @@ class EventService {
   async listAvailable(userId: IUser["id"]): Promise<IEventPublic[]> {
     return this.events
       .filter((event) => !(event.participants ?? []).includes(userId))
+      .filter((event) => event.status !== "canceled")
       .map((event) => EventService.transformToPublic(event));
   }
 
   async listMyParticipation(userId: IUser["id"]) {
     return this.events
       .filter((event) => event.participants?.includes(userId))
+      .filter((event) => event.status !== "canceled")
       .map((event) => EventService.transformToPublic(event));
   }
 
@@ -176,6 +179,17 @@ class EventService {
     event.participants.splice(userIndex, 1);
 
     return true;
+  }
+
+  async cancel(
+    ownerId: IEvent["ownerId"],
+    eventId: IEvent["id"]
+  ): Promise<IUser["id"][]> {
+    const event = await this.getById(ownerId, eventId);
+
+    event.status = "canceled";
+
+    return event.participants;
   }
 }
 

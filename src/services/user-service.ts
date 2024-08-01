@@ -75,6 +75,16 @@ class UserService {
 
     return users.map(UserService.transformToPublic);
   }
+
+  async getById(userId: IUser["id"]): Promise<IUser> {
+    const user = this.users.find((u) => u.id === userId);
+
+    if (!user) {
+      throw new Error("No user found");
+    }
+
+    return user;
+  }
 }
 
 export default UserService;

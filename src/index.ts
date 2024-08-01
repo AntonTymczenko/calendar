@@ -10,12 +10,17 @@ import { handleEventParticipate } from "./api/event/participate";
 import { handleEventListParticipants } from "./api/event/participants";
 import { handleUserListParticipated } from "./api/user/events";
 import { handleEventLimitCapacity } from "./api/event/limit-capacity";
+import { handleEventCancel } from "./api/event/cancel";
+import MessageService from "./services/message-service";
+import EmailService from "./services/email-service";
 
 const port = 8080;
 
 // services and middleware
 const userService = new UserService();
 const eventService = new EventService();
+const emailService = new EmailService();
+const messageService = new MessageService(emailService, userService);
 const handleAuth = APIAuth(userService);
 
 // routes
@@ -27,6 +32,7 @@ const routes = {
   event: {
     create: handleEventCreate(eventService),
     limitCapacity: handleEventLimitCapacity(eventService),
+    cancel: handleEventCancel(eventService, messageService),
     participate: handleEventParticipate(eventService),
     participants: handleEventListParticipants(eventService, userService),
   },
@@ -56,6 +62,7 @@ const server = http.createServer(
           /^\/event\/[-a-f0-9]+\/limit-capacity$/,
           routes.event.limitCapacity,
         ],
+        ["POST", /^\/event\/[-a-f0-9]+\/cancel$/, routes.event.cancel],
         [
           "GET",
           /^\/event\/[-a-f0-9]+\/participants$/,

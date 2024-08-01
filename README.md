@@ -14,7 +14,8 @@ participant registration, and checking participation status.
   my schedule.
 - As an event organiser, I would like to limit the number of participants for an event, so
   that events do not exceed capacity.
-
+- As an event organizer, I would like to cancel an event, so that participants
+  are informed and do not attend.
 
 ## Development
 ### Local setup
@@ -112,4 +113,18 @@ capacity
 **Response:**
 ```json
 { "capacity": number }
+```
+
+### POST `/event/:id/cancel`
+
+Change event's status to 'canceled' and send emails to each participant.
+
+**Request:** No request body
+
+**Response:**
+```json
+{
+  "canceled": true,
+  "allSent": boolean
+}
 ```
